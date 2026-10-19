@@ -16,8 +16,10 @@ Fitur:
 app.py                  # antarmuka Streamlit
 inference.py            # preprocessing + prediksi (dipakai app & skrip evaluasi)
 config.json             # kontrak model: kelas, ukuran input, normalisasi
-model/model.keras       # file model
-train_temp.py           # pelatihan model sementara
+model/model.keras       # model final tim (CNN hasil tuning)
+model/metrics.json      # hyperparameter + akurasi model final
+train_final.py          # pelatihan ulang model final tim (Trial #17)
+train_temp.py           # pelatihan model sementara (lama, tidak dipakai)
 evaluate_new_images.py  # uji gambar baru -> results.csv
 test_images/<kelas>/    # gambar uji di luar dataset
 requirements.txt
@@ -41,9 +43,32 @@ streamlit run app.py
 
 Buka http://localhost:8501.
 
-## Mengganti dengan model final tim
+## Model final tim
 
-1. Simpan model final sebagai `model/model.keras` (atau `.h5`, lalu ubah `model_path`).
+Model yang dipakai adalah konfigurasi terbaik dari notebook *Hyperparameter
+Tuning CNN pada CIFAR-10* (Random Search Keras Tuner, 20 trial, Trial #17):
+
+| Hyperparameter | Nilai |
+|---|---|
+| Arsitektur | Conv 32 → Pool → Conv 64 → Pool → Conv 128 → Dense 128 → Dropout → Dense 10 |
+| Kernel | 3×3 |
+| Optimizer | SGD (momentum 0,9, Nesterov) |
+| Learning rate | 0,00376 |
+| Batch size | 32 |
+| Epoch | maks 40, EarlyStopping val_accuracy (patience 5) |
+| Dropout | 0,7 |
+| Augmentasi | tidak |
+
+Hasil di Colab: val accuracy 0,7372, test accuracy 0,7259, macro F1 0,7260.
+
+`model/model.keras` dilatih ulang secara lokal dengan `python train_final.py`
+(seed 42, split 90/10 stratified), sehingga angkanya bisa sedikit berbeda dari
+Colab; lihat `model/metrics.json`. Jika file `cnn_best_tuned.keras` dari ZIP
+Colab tersedia, cukup salin ke `model/model.keras`.
+
+## Mengganti model
+
+1. Simpan model sebagai `model/model.keras` (atau `.h5`, lalu ubah `model_path`).
 2. Sesuaikan `config.json`:
    - `class_names` — urutan **harus sama** dengan urutan output model.
    - `input_size` — ukuran input model, mis. `[32, 32]`.

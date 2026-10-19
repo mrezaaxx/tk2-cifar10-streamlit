@@ -1,6 +1,24 @@
 {
-  "test_accuracy": 0.8339,
-  "test_loss": 0.4756,
-  "epochs_run": 15,
-  "tensorflow_version": "2.18.1"
+  "model": "cnn_tuned (Random Search Trial #17)",
+  "hyperparameters": {
+    "learning_rate": 0.0037566671460548032,
+    "optimizer": "sgd",
+    "kernel_size": 3,
+    "base_filters": 32,
+    "dropout": 0.7,
+    "augment": false,
+    "batch_size": 32,
+    "epochs": 40
+  },
+  "val_accuracy": 0.726,
+  "test_accuracy": 0.717,
+  "test_loss": 0.8374,
+  "epochs_run": 19,
+  "params": 356810,
+  "tensorflow_version": "2.18.1",
+  "colab_reference": {
+    "val_accuracy": 0.7372,
+    "test_accuracy": 0.7259,
+    "macro_f1": 0.726
+  }
 }

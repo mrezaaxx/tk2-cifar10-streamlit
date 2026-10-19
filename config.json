@@ -15,5 +15,5 @@
   "input_size": [32, 32],
   "normalization": "rescale_255",
   "tensorflow_version": "2.18",
-  "model_note": "Model sementara (train_temp.py). Ganti dengan model final tim."
+  "model_note": "Model final tim: CNN hasil Random Search (Keras Tuner, Trial #17), SGD Nesterov, dropout 0.7."
 }
