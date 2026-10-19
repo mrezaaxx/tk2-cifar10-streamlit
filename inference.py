@@ -21,11 +21,15 @@ def load_model(config):
     return tf.keras.models.load_model(path)
 
 
+def resize_for_model(image: Image.Image, config) -> Image.Image:
+    """RGB -> resize ke ukuran input model dengan metode resample dari config."""
+    resample = Image.Resampling[config.get("resample", "bilinear").upper()]
+    return image.convert("RGB").resize(tuple(config["input_size"]), resample)
+
+
 def preprocess(image: Image.Image, config) -> np.ndarray:
     """RGB -> resize ke input model -> normalisasi -> tambah dimensi batch."""
-    width, height = config["input_size"]
-    image = image.convert("RGB").resize((width, height), Image.Resampling.LANCZOS)
-    arr = np.asarray(image, dtype="float32")
+    arr = np.asarray(resize_for_model(image, config), dtype="float32")
     if config["normalization"] == "rescale_255":
         arr = arr / 255.0
     else:

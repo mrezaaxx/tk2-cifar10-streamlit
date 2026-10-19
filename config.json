@@ -13,7 +13,8 @@
     "truck"
   ],
   "input_size": [32, 32],
+  "resample": "bilinear",
   "normalization": "rescale_255",
   "tensorflow_version": "2.18",
-  "model_note": "Model final tim: CNN hasil Random Search (Keras Tuner, Trial #17), SGD Nesterov, dropout 0.7."
+  "model_note": "Model final tim: transfer learning MobileNetV2 (ImageNet, resize 96 px di dalam model) + augmentasi, eksperimen D. Test accuracy 0,9217."
 }

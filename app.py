@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 from PIL import Image, UnidentifiedImageError
 
-from inference import load_config, load_model, predict
+from inference import load_config, load_model, predict, resize_for_model
 
 MAX_FILE_MB = 5
 LOW_CONFIDENCE = 0.50
@@ -73,7 +73,7 @@ with col1:
     st.image(image, caption=f"Gambar asli ({image.width}×{image.height})", width="stretch")
 with col2:
     w, h = config["input_size"]
-    small = image.convert("RGB").resize((w, h), Image.Resampling.LANCZOS)
+    small = resize_for_model(image, config)
     st.image(
         small.resize((256, 256), Image.Resampling.NEAREST),
         caption=f"Yang dilihat model ({w}×{h})",

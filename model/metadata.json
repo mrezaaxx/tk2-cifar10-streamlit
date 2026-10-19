@@ -1,0 +1,139 @@
+{
+  "model_file": "best_model.keras",
+  "experiment": "D",
+  "description": "Transfer learning MobileNetV2 (ImageNet, 96px) + augmentasi",
+  "selection": {
+    "chosen": "D",
+    "reason": "D memiliki val accuracy tertinggi (0.9286). Keunggulannya atas CNN terbaik (C4, 0.8424) ≥ 1 poin, sepadan dengan ukuran model yang lebih besar.",
+    "criterion": "val accuracy (seri: val loss)",
+    "locked_at": "2026-10-18 06:21:53",
+    "val_ranking": [
+      [
+        "D",
+        0.9286
+      ],
+      [
+        "C4",
+        0.8424
+      ],
+      [
+        "C2",
+        0.7692
+      ],
+      [
+        "B5",
+        0.732
+      ],
+      [
+        "B2",
+        0.7282
+      ],
+      [
+        "A",
+        0.7238
+      ],
+      [
+        "B1",
+        0.7184
+      ],
+      [
+        "B4",
+        0.7184
+      ],
+      [
+        "C3",
+        0.6924
+      ],
+      [
+        "B3",
+        0.688
+      ],
+      [
+        "C1",
+        0.6582
+      ]
+    ]
+  },
+  "input": {
+    "shape": [
+      32,
+      32,
+      3
+    ],
+    "dtype": "float32",
+    "color_mode": "RGB",
+    "value_range": [
+      0.0,
+      1.0
+    ]
+  },
+  "preprocessing": [
+    "Konversi ke RGB",
+    "Resize ke 32x32 (bilinear)",
+    "float32 dibagi 255 → [0,1]",
+    "Tidak ada normalisasi mean/std; augmentasi & resize MobileNetV2 (jika ada) sudah di dalam model"
+  ],
+  "output": {
+    "type": "softmax",
+    "class_index": {
+      "0": "airplane",
+      "1": "automobile",
+      "2": "bird",
+      "3": "cat",
+      "4": "deer",
+      "5": "dog",
+      "6": "frog",
+      "7": "horse",
+      "8": "ship",
+      "9": "truck"
+    }
+  },
+  "metrics": {
+    "validation": {
+      "loss": 0.2097940444946289,
+      "accuracy": 0.9286,
+      "precision": 0.9297086245969904,
+      "recall": 0.9286,
+      "f1": 0.928519216283348
+    },
+    "test": {
+      "loss": 0.23440927267074585,
+      "accuracy": 0.9217,
+      "precision": 0.9219934098685172,
+      "recall": 0.9216999999999999,
+      "f1": 0.9213171289935739
+    }
+  },
+  "params": 2270794,
+  "model_size_mb": 9.68,
+  "cpu_latency_ms_per_image": 164.78,
+  "training_config": {
+    "img_size": 96,
+    "head_dropout": 0.2,
+    "head_epochs": 3,
+    "head_lr": 0.001,
+    "ft_epochs": 12,
+    "ft_lr": 0.0001,
+    "fine_tune_at": 54,
+    "ft_patience": 4,
+    "batch_size": 128,
+    "augment": true
+  },
+  "dataset": {
+    "name": "CIFAR-10",
+    "split": "train resmi 90:10 stratified seed 42 (45.000/5.000) + test resmi 10.000",
+    "fingerprint": {
+      "val_labels_md5": "afdbf1a3e06666c4dd116ca7075e0535",
+      "val_first100_md5": "de21c046e8bb653c045a2bc980212861"
+    }
+  },
+  "environment": {
+    "python": "3.13.15",
+    "tensorflow": "2.21.0",
+    "keras": "3.13.2",
+    "gpu": "Tesla T4",
+    "colab": true,
+    "smoke_test": false
+  },
+  "load_note": "keras.models.load_model('best_model.keras') → siap predict(), tidak perlu custom_objects."
+}

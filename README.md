@@ -1,8 +1,8 @@
 # Klasifikasi Gambar CIFAR-10 (Tugas Kelompok 2)
 
 Aplikasi web Streamlit yang menerima gambar (JPG/PNG) dan menampilkan prediksi
-model CNN untuk 10 kelas CIFAR-10: airplane, automobile, bird, cat, deer, dog,
-frog, horse, ship, truck.
+model MobileNetV2 (transfer learning) untuk 10 kelas CIFAR-10: airplane,
+automobile, bird, cat, deer, dog, frog, horse, ship, truck.
 
 Fitur:
 - Unggah gambar, tampilkan gambar asli dan versi 32×32 yang dilihat model.
@@ -15,10 +15,10 @@ Fitur:
 ```
 app.py                  # antarmuka Streamlit
 inference.py            # preprocessing + prediksi (dipakai app & skrip evaluasi)
-config.json             # kontrak model: kelas, ukuran input, normalisasi
-model/model.keras       # model final tim (CNN hasil tuning)
-model/metrics.json      # hyperparameter + akurasi model final
-train_final.py          # pelatihan ulang model final tim (Trial #17)
+config.json             # kontrak model: kelas, ukuran input, resize, normalisasi
+model/model.keras       # model final tim (MobileNetV2, eksperimen D)
+model/metadata.json     # metadata, konfigurasi training + metrik model final
+train_final.py          # pelatihan CNN hasil tuning (Trial #17, lama, tidak dipakai)
 train_temp.py           # pelatihan model sementara (lama, tidak dipakai)
 evaluate_new_images.py  # uji gambar baru -> results.csv
 test_images/<kelas>/    # gambar uji di luar dataset
@@ -45,26 +45,32 @@ Buka http://localhost:8501.
 
 ## Model final tim
 
-Model yang dipakai adalah konfigurasi terbaik dari notebook *Hyperparameter
-Tuning CNN pada CIFAR-10* (Random Search Keras Tuner, 20 trial, Trial #17):
+Model yang dipakai adalah hasil optimasi tim (`tk2_hasil_optimasi_model`),
+**eksperimen D**: transfer learning MobileNetV2 (bobot ImageNet) dengan
+augmentasi. Gambar masuk ke model sebagai 32×32 RGB (piksel ÷ 255); augmentasi
+dan resize ke 96×96 untuk MobileNetV2 sudah ada di dalam model.
 
-| Hyperparameter | Nilai |
+| Konfigurasi | Nilai |
 |---|---|
-| Arsitektur | Conv 32 → Pool → Conv 64 → Pool → Conv 128 → Dense 128 → Dropout → Dense 10 |
-| Kernel | 3×3 |
-| Optimizer | SGD (momentum 0,9, Nesterov) |
-| Learning rate | 0,00376 |
-| Batch size | 32 |
-| Epoch | maks 40, EarlyStopping val_accuracy (patience 5) |
-| Dropout | 0,7 |
-| Augmentasi | tidak |
+| Backbone | MobileNetV2 (ImageNet), input internal 96×96 |
+| Training head | 3 epoch, lr 0,001, dropout 0,2 |
+| Fine-tuning | dari layer 54, 12 epoch, lr 0,0001, EarlyStopping patience 4 |
+| Batch size | 128 |
+| Augmentasi | ya |
+| Parameter | 2.270.794 (9,7 MB) |
 
-Hasil di Colab: val accuracy 0,7372, test accuracy 0,7259, macro F1 0,7260.
+Dipilih karena val accuracy tertinggi dibanding seluruh eksperimen
+(CNN terbaik C4: 0,8424; CNN Random Search: 0,72–0,73).
 
-`model/model.keras` dilatih ulang secara lokal dengan `python train_final.py`
-(seed 42, split 90/10 stratified), sehingga angkanya bisa sedikit berbeda dari
-Colab; lihat `model/metrics.json`. Jika file `cnn_best_tuned.keras` dari ZIP
-Colab tersedia, cukup salin ke `model/model.keras`.
+| Metrik | Validasi | Test |
+|---|---|---|
+| Accuracy | 0,9286 | 0,9217 |
+| Macro F1 | 0,9285 | 0,9213 |
+
+Test accuracy 0,9217 juga terverifikasi ulang secara lokal dengan
+TensorFlow 2.18.1 + Keras 3.15.1. Detail lengkap ada di `model/metadata.json`.
+Model dilatih di Colab (TF 2.21 / Keras 3.13); file `.keras` termuat tanpa
+`custom_objects` di versi yang dipasang `requirements.txt`.
 
 ## Mengganti model
 
@@ -72,6 +78,7 @@ Colab tersedia, cukup salin ke `model/model.keras`.
 2. Sesuaikan `config.json`:
    - `class_names` — urutan **harus sama** dengan urutan output model.
    - `input_size` — ukuran input model, mis. `[32, 32]`.
+   - `resample` — metode resize PIL, samakan dengan training (mis. `bilinear`).
    - `normalization` — saat ini `rescale_255` (piksel ÷ 255). Jika model memakai
      normalisasi lain (mis. preprocess_input untuk transfer learning), tambahkan di
      `inference.preprocess`.
@@ -94,5 +101,6 @@ Hasil per gambar ditulis ke `results.csv` untuk bab evaluasi laporan.
 ## Keterbatasan
 
 - Model hanya mengenal 10 kelas; gambar di luar kelas tetap dipaksa ke salah satunya.
-- Input diperkecil ke 32×32, sehingga detail gambar beresolusi tinggi hilang.
+- Input diperkecil ke 32×32 (bilinear), sehingga detail gambar beresolusi tinggi hilang.
+- Inferensi di CPU lebih lambat dari CNN kecil (±165 ms/gambar di Colab).
 - Confidence softmax tinggi bukan jaminan prediksi benar.
